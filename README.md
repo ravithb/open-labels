@@ -35,4 +35,5 @@ Usage is as follows.
  - [ ] Create tool operator page to send commands to the http server
  - [ ] Create label designer
  - [ ] Create support for other printer models
-- 
+
+ 
