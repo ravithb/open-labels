@@ -29,6 +29,7 @@ Usage is as follows.
 
  - [x] Create basic utility
  - [x] Fix bug in printing 2 labels when 3 labels are in a row
+ - [ ] Add functionality to query printer status
  - [ ] Create GUI 
  - [ ] Create Base64 image decoder module
  - [ ] Create http server to support printing via web
