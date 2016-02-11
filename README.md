@@ -29,11 +29,10 @@ Usage is as follows.
 
  - [x] Create basic utility
  - [x] Fix bug in printing 2 labels when 3 labels are in a row
- - [ ] Add functionality to query printer status
- - [ ] Create GUI 
  - [x] Create Base64 image decoder module
  - [x] Create http server to support printing via web
  - [x] Create tool operator page to send commands to the http server
+ - [ ] Create GUI 
  - [ ] Support png and jpeg image types
  - [ ] Create label designer
  - [ ] Create support for other printer models
