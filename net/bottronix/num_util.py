@@ -17,6 +17,7 @@ class NumUtil():
     
     @staticmethod
     def to_lh_int(integer):
+        integer = int(integer)
         lx = integer % 256
         hx = ( integer >> 8 ) & 0xFF
         return (hx,lx)

@@ -7,34 +7,69 @@ Created on Feb 7, 2016.
 
 """
 from net.bottronix.print_manager import PrintManager
-import sys
+import os
+import socketserver
+from net.bottronix.print_daemon import get_print_job_hander
+from argparse import ArgumentParser
+from net.bottronix.print_exception import PrintException
+
 
 if __name__ == '__main__':
-
-    if(len(sys.argv)<8):
-        print("Usage is : python main.py <label-file> <width-mm> <height-mm> <horizontal-gap-mm> <vertical-gap-mm> <labels-per-row> <paper-width-mm> <lable-count> [<printer-port>]")
-        print("\n")
-        print("1) label-file         : Path to the label file. Must be a black and white 8-bit per pixel BMP file")
-        print("2) width-mm           : Width of the label in mm")
-        print("3) height-mm          : Height of the label in mm")
-        print("4) horizontal-gap-mm  : Horizontal gap between two adjacent labels in mm")
-        print("5) vertical-gap-mm    : Vertical gap between two adjacent labels in mm")
-        print("6) labels-per-row     : Number of labels per row on the paper.")
-        print("7) paper-width-mm     : Width of the label paper in mm")
-        print("8) label-x-offset-mm  : Horizontal offset in mm")
-        print("9) label-y-offset-mm  : Vertical offset in mm")
-        print("10) label-count       : Number of lables to print")
-        print("11) printer-port      : [Optional] printer device path [eg: /dev/usb/lp0]")
-        sys.exit()
+    
+    parser = ArgumentParser()
+    parser.add_argument("label_file",help="Path to the label file. Must be  black and white 8-bit/pixel BMP file.")
+    parser.add_argument("width_mm",help="Width of the label in mm",type=float)
+    parser.add_argument("height_mm",help="Height of the label in mm",type=float)
+    parser.add_argument("horizontal_gap_mm",help="Horizontal gap between two adjacent labels in mm",type=float)
+    parser.add_argument("vertical_gap_mm",help="Vertical gap between two adjacent labels in mm",type=float)
+    parser.add_argument("labels_per_row",help="Number of labels per row on the paper.",type=int)
+    parser.add_argument("paper_width_mm",help="Width of the label paper in mm",type=float)
+    parser.add_argument("label_x_offset_mm",help="Horizontal offset in mm",type=float)
+    parser.add_argument("label_y_offset_mm",help="Vertical offset in mm",type=float)
+    parser.add_argument("label_count",help="Number of lables to print",type=int)
+    parser.add_argument("-p","--printer_port",help="Printer device path [eg: /dev/usb/lp0]")
+    parser.add_argument("-d","--run_as_daemon",help="Printer device path [eg: /dev/usb/lp0]")
+    parser.add_argument("-l","--listen",help="Daemon listen port. Default 31173",type=int)
+    
+    args = parser.parse_args()
         
     print_mgr = PrintManager()
-    print_mgr.set_label_file(sys.argv[1])
-    print_mgr.set_label_size(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
-    print_mgr.set_print_options(sys.argv[6], sys.argv[7],sys.argv[8],sys.argv[9])
-    print_mgr.set_label_count(sys.argv[10])
+    print_mgr.set_label_gaps(args.horizontal_gap_mm, args.vertical_gap_mm)
+    print_mgr.set_print_options(args.labels_per_row, args.paper_width_mm,args.label_x_offset_mm,args.label_y_offset_mm)
+    print_mgr.set_label_count(args.label_count)
     
-    if(len(sys.argv)==12):
-        print_mgr.set_printer_port(sys.argv[11])
+    if(args.printer_port):
+        print_mgr.set_printer_port(args.printer_port)
+        
+    print(print_mgr.get_config())
 
-    print_mgr.init()
-    print_mgr.print_labels()
+    if(args.run_as_daemon):
+#         daemon = PrintDaemon()        
+        print("****** Open Labels Daemon ******")        
+        print("Starting....")
+        
+        os.chdir(os.path.join(os.path.dirname(os.path.realpath('__file__')), "htdocs"))
+     
+        print_job_handler_class = get_print_job_hander(print_mgr)
+        httpd = socketserver.TCPServer(("", 31173), print_job_handler_class)
+     
+        print("Daemon started on port : ", 31173)
+        try:
+            httpd.serve_forever()
+        except KeyboardInterrupt:
+            pass
+            print("Stopping....")
+            httpd.server_close()
+        finally:
+            print_mgr.close_printer()
+
+    else:
+        print_mgr.set_label_file(args.label_file)
+        print_mgr.set_label_size(args.width_mm, args.height_mm)
+        try:
+            print_mgr.init()
+            print_mgr.print_labels()
+        except PrintException as e:
+            print("Error occured : "+e.value)
+        finally:
+            print_mgr.close_printer()

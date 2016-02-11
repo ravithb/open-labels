@@ -1,0 +1,21 @@
+body{
+	font-family: Arial,Helvetica Neue,Helvetica,sans-serif;
+	font-size:12px;
+	padding:0px;
+}
+
+#container{
+	padding:10px;
+	border: 1px solid #999999;
+	border-radius : 5px;
+	width: 350px;
+}
+
+#previewHolder{
+	max-width:300px;
+	display:none;
+}
+
+.form-row{
+	padding:4px;
+}

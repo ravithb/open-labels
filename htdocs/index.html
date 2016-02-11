@@ -1,0 +1,114 @@
+<html>
+<head>
+	<title>Open Labels</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+	<script type="text/javascript">
+		var labelData = null;
+		
+		function readURL(input) {
+			if (input.files && input.files[0]) {
+				var reader = new FileReader();
+				reader.onload = function(e) {
+					$('#previewHolder').attr('src', e.target.result);
+					$("#previewHolder").show();
+					
+					convertImgToDataURLviaCanvas(e.target.result,function(c){
+						labelData = c;
+					});
+				}
+
+				reader.readAsDataURL(input.files[0]);
+				
+			}
+		}
+		
+		function convertImgToDataURLviaCanvas(url, callback){
+			var img = new Image();
+			img.crossOrigin = 'Anonymous';
+			img.onload = function(){
+				var canvas = document.createElement('CANVAS');
+				var ctx = canvas.getContext('2d');
+				var dataURL;
+				canvas.height = this.height;
+				canvas.width = this.width;
+				ctx.drawImage(this, 0, 0);
+				dataURL = canvas.toDataURL("image/bmp");
+				callback(dataURL);
+				canvas = null; 
+			};
+			img.src = url;
+		}
+		
+		$(document).ready(function(){
+			$("#filePhoto").change(function() {
+			  readURL(this);
+			});
+		});
+		
+		function sendData(){
+			$.ajax({
+				url: "/",
+				data:JSON.stringify( {
+					"labelData" : labelData,
+					"labelWidth" : $('#labelWidth').val(),
+					"labelHeight" : $('#labelHeight').val(),
+					"labelCount" : $('#labelCount').val()
+					
+				}),
+				type : "POST",
+				dataType: "json",
+				success: function(result){
+					console.log(result);
+				}
+			});
+		}
+	</script>
+	<link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<div>
+	<h3>Open Labels Daemon Client</h3>
+	<div id="container">
+		<div class="form-row">
+			<div>
+				<label for"filePhoto">Select Label : </label>
+			</div>
+			<div>
+				<fieldset>
+					<legend>Preview</legend>
+					<input type="file" accept="image/bmp,image/x-windows-bmp"  name="filePhoto" value="" id="filePhoto" />
+					<img id="previewHolder" alt="Uploaded Image Preview Holder"/>
+				</fieldset>
+			</div>		
+		</div>
+		<div class="form-row">
+			<div>
+				<label for"labelWidth">Label Width (mm): </label>
+			</div>
+			<div>
+				<input type="number" id="labelWidth" name="labelWidth/">
+			</div>		
+		</div>
+		<div class="form-row">
+			<div>
+				<label for"labelWidth">Label Height (mm): </label>
+			</div>
+			<div>
+				<input type="number" id="labelHeight" name="labelHeight/">
+			</div>		
+		</div>
+		<div class="form-row">
+			<div>
+				<label for"labelWidth">Print Count: </label>
+			</div>
+			<div>
+				<input type="number" id="labelCount" name="labelCount/">
+			</div>		
+		</div>
+		<div class="form-row">
+			<button type="button" onclick="sendData()">Print</button>
+		</div>
+	</div>
+</div>
+</body>
+</html>
