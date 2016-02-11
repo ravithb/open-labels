@@ -36,5 +36,5 @@ class LabelGrid():
                 x+=int(src_width+x_gap)
             y+=int(src_height+y_gap)
             x=0
-        new_img.show()
+#         new_img.show()
         return new_img

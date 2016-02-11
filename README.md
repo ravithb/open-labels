@@ -28,11 +28,12 @@ Usage is as follows.
 # TODO List
 
  - [x] Create basic utility
- - [ ] Fix bug in orinting 2 labels when 3 labels are in a row
+ - [x] Fix bug in printing 2 labels when 3 labels are in a row
  - [ ] Create GUI 
  - [ ] Create Base64 image decoder module
  - [ ] Create http server to support printing via web
  - [ ] Create tool operator page to send commands to the http server
+ - [ ] Support png and jpeg image types
  - [ ] Create label designer
  - [ ] Create support for other printer models
 

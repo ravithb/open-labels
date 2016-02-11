@@ -22,7 +22,7 @@ if __name__ == '__main__':
         print("6) labels-per-row     : Number of labels per row on the paper.")
         print("7) paper-width-mm     : Width of the label paper in mm")
         print("8) label-x-offset-mm  : Horizontal offset in mm")
-        print("9) layel-y-offset-mm  : Vertical offset in mm")
+        print("9) label-y-offset-mm  : Vertical offset in mm")
         print("10) label-count       : Number of lables to print")
         print("11) printer-port      : [Optional] printer device path [eg: /dev/usb/lp0]")
         sys.exit()
@@ -30,8 +30,8 @@ if __name__ == '__main__':
     print_mgr = PrintManager()
     print_mgr.set_label_file(sys.argv[1])
     print_mgr.set_label_size(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
-    print_mgr.set_print_options(sys.argv[6], sys.argv[7],sys.argv[9],sys.argv[10])
-    print_mgr.set_label_count(sys.argv[8])
+    print_mgr.set_print_options(sys.argv[6], sys.argv[7],sys.argv[8],sys.argv[9])
+    print_mgr.set_label_count(sys.argv[10])
     
     if(len(sys.argv)==12):
         print_mgr.set_printer_port(sys.argv[11])

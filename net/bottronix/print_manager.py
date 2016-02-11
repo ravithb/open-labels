@@ -3,7 +3,7 @@ Created on Feb 10, 2016
 
 @author: ravith
 '''
-from net.bottronix.printerutil import PrinterUtil
+from net.bottronix.printer_util import PrinterUtil
 import sys
 import os.path
 from net.bottronix.label_grid import LabelGrid
@@ -73,7 +73,7 @@ class PrintManager():
             grid_img = label_grid.create_grid_img(self.label_file, self.labels_per_row, self.label_x_gap_mm)
         if(print_count_remainder > 0):
             grid_img_remainder = label_grid.create_grid_img(self.label_file, print_count_remainder, self.label_x_gap_mm)
-        print((print_count,print_count_remainder))
+#         print((print_count,print_count_remainder))
         
         self.open_printer()
                 
@@ -133,8 +133,7 @@ class PrintManager():
         
         print("Printing image.")
         w,h= img.size
-#         img.save('/tmp/grid3.bmp')
-        print((w,h))
+#         print((w,h))
         bi = BitImg()
         im_data = bi.get_bit_bytes(bytearray(img.getdata()))
         hx,lx = NumUtil.to_lh_int(self.label_x_offset_mm*DOTS_PER_MM)
@@ -144,7 +143,7 @@ class PrintManager():
  
         cmd = bytearray([0x4C,0x44,lx,hx,ly,hy,lw,hw,llines,hlines])
         cmd.extend(im_data)
-        print(''.join(format(x, '02x') for x in cmd)) 
+#         print(''.join(format(x, '02x') for x in cmd)) 
         self.printer.write(cmd)        
         self.printer.write("P"+str(int(print_count))+"\r\n")
         
