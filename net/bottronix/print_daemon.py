@@ -26,10 +26,11 @@ def get_print_job_hander(prnt_manager):
             self.print_manager = prnt_manager
             super().__init__(*args, **kwargs)
     
-    #     def do_HEAD(self):
-    #         self.send_response(200)
-    #         self.send_header("Content-type", "text/html")
-    #         self.end_headers()
+        def do_HEAD(self):
+            self.send_response(200)
+            self.send_header("Content-type", "text/html")
+            self.send_header("Access-Control-Allow-Origin","*")
+            self.end_headers()
     #         
         def do_POST(self):
     
@@ -64,11 +65,15 @@ def get_print_job_hander(prnt_manager):
             self.send_response(http_result_code)
             self.send_header("Content-type", "application/json")
             self.send_header("Content-length", len(response))
+            self.send_header("Access-Control-Allow-Origin","*")
             self.end_headers()
             self.wfile.write(response)
              
-    #     def do_GET(self):     
-    # 
+        def end_headers(self):
+            self.send_header("Access-Control-Allow-Origin","*")
+            SimpleHTTPRequestHandler.end_headers(self)     
+            
+    #
     #         try:
     #             uiFile = open(os.path.join(os.path.dirname(os.path.realpath('__file__')), "../../resources/ui-file.html"),"r")
     #             if(uiFile):
