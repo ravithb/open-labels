@@ -29,7 +29,11 @@ def get_print_job_hander(prnt_manager):
         def do_HEAD(self):
             self.send_response(200)
             self.send_header("Content-type", "text/html")
-            self.send_header("Access-Control-Allow-Origin","*")
+            self.end_headers()
+            
+        def do_OPTIONS(self):
+            self.send_response(200)
+            self.send_header("Content-type", "text/html")
             self.end_headers()
     #         
         def do_POST(self):
@@ -65,12 +69,12 @@ def get_print_job_hander(prnt_manager):
             self.send_response(http_result_code)
             self.send_header("Content-type", "application/json")
             self.send_header("Content-length", len(response))
-            self.send_header("Access-Control-Allow-Origin","*")
             self.end_headers()
             self.wfile.write(response)
              
         def end_headers(self):
             self.send_header("Access-Control-Allow-Origin","*")
+            self.send_header("Access-Control-Allow-Headers", "Content-Type")
             SimpleHTTPRequestHandler.end_headers(self)     
             
     #
