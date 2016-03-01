@@ -32,7 +32,7 @@ Usage is as follows.
  - [x] Create Base64 image decoder module
  - [x] Create http server to support printing via web
  - [x] Create tool operator page to send commands to the http server
- - [ ] Create GUI 
+ - [x] Create GUI 
  - [ ] Support png and jpeg image types
  - [ ] Create label designer
  - [ ] Create support for other printer models
