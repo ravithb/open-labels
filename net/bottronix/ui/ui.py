@@ -9,9 +9,7 @@ Created on Feb 28, 2016
 
 import gi
 import os
-import json
-from pprint import pprint
-from os.path import expanduser
+import sys
 from net.bottronix.print_server import PrintServer
 from net.bottronix.ui.preset import Preset
 gi.require_version('Gtk', '3.0')
@@ -26,6 +24,7 @@ class OpenLabelsUi:
 
     def on_quit_activate(self, menuitem, data=None):
         print("quit from menu")
+        self.stop_server()
         Gtk.main_quit()
     
     def on_about_activate(self, menuitem, data=None):
@@ -35,30 +34,40 @@ class OpenLabelsUi:
 
     def on_click_server_start_stop(self,object):
         if(self.server_running):            
-            self.print_server.stop_server()
-            self.server_running= False
-            self.btn_start_server.set_label("Start Server")
-            self.statusbar.push(self.statusbar_context_id,"Server stopped.")
-            
-                
+            self.stop_server()
         else:
             validation = self.validate_inputs()
             if(validation ==0 ) :
                 port = 31173
                 self.get_input_values()
                 self.statusbar.push(self.statusbar_context_id,"Starting server...")
-                self.print_server = PrintServer(port,\
-                    os.path.dirname(os.path.join(os.path.dirname(os.path.realpath('__file__')),"../")))
-                self.print_server.set_configuration(self.width, self.height, self.x_gap, \
-                    self.y_gap, self.paper_width, self.labels_per_row, self.x_offset, self.y_offset)
-                self.print_server.start_server()
-                self.statusbar.push(self.statusbar_context_id,"Server started on port "+str(port))
-                self.server_running = True
-                self.btn_start_server.set_label("Stop Server")
+                self.start_server(port)
             
             else:
                 self.statusbar.push(self.statusbar_context_id,"Invalid configuraiton")
-        
+                
+    def start_server(self,port):
+        self.print_server = PrintServer(port,\
+                    os.path.dirname(os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)),"../../"))))
+        self.print_server.set_configuration(self.width, self.height, self.x_gap, \
+            self.y_gap, self.paper_width, self.labels_per_row, self.x_offset, self.y_offset)
+        try:
+            self.print_server.start_server()
+        except OSError as e:
+            self.statusbar.push(self.statusbar_context_id,"Server start failed. "+e.strerror)
+            self.server_running = False
+            return
+        self.statusbar.push(self.statusbar_context_id,"Server started on port "+str(port))
+        self.server_running = True
+        self.btn_start_server.set_label("Stop Server")
+
+    def stop_server(self):
+        if(self.print_server != None):
+            self.print_server.stop_server()
+            self.server_running = False
+            self.btn_start_server.set_label("Start Server")
+            self.statusbar.push(self.statusbar_context_id, "Server stopped.")
+
     def on_warning_dialog_close(self,object, object2):
         self.warning_msg.hide()
     
@@ -201,7 +210,8 @@ class OpenLabelsUi:
         self.preset_listbox.set_model(self.preset_liststore)
         
     def __init__(self):
-        self.gladefile = "ui.glade" 
+        self.print_server = None
+        self.gladefile = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "ui.glade" ))
         self.builder = Gtk.Builder() 
         self.builder.add_from_file(self.gladefile)
 
@@ -268,9 +278,12 @@ class OpenLabelsUi:
 
         self.server_running = False
         
-        
+    @staticmethod
+    def run_ui():
+        main = OpenLabelsUi()
+        Gtk.main()
+    
 if __name__ == "__main__":
-    main = OpenLabelsUi()
-    Gtk.main() 
+        OpenLabelsUi.run_ui()
 
 
