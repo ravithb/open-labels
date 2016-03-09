@@ -3,11 +3,16 @@ A utility to print barcode and other labels on the Bixolon SLP-T400 Label printe
 
 It currently can automatically detect the usb node for Bixolon SLP-T400 printer. 
 
-Usage is as follows.
+Commandline Usage is as follows.
 
 ```
 
-        python main.py <label-file> <width-mm> <height-mm> <horizontal-gap-mm> <vertical-gap-mm> <labels-per-row> <paper-width-mm> <lable-count> [<printer-port>]
+        ./main.py <label-file> <width-mm> <height-mm> <horizontal-gap-mm> <vertical-gap-mm> <labels-per-row> <paper-width-mm> <lable-count> [<printer-port>]
+        
+```
+To Run UI
+```
+        ./run-ui.py
 ```
 
 ```
