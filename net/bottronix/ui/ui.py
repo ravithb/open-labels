@@ -10,6 +10,7 @@ Created on Feb 28, 2016
 import gi
 import os
 import sys
+import time
 from net.bottronix.print_server import PrintServer
 from net.bottronix.ui.preset import Preset
 from DistUpgrade import sourceslist
@@ -20,6 +21,16 @@ from gi.repository import Gtk
 
 class OpenLabelsUi:
 
+    def resource_path(self):
+        """ Get absolute path to resource, works for dev and for PyInstaller """
+        try:
+            # PyInstaller creates a temp folder and stores path in _MEIPASS
+            base_path = sys._MEIPASS
+        except Exception:
+            base_path = os.path.dirname(os.path.realpath(__file__))
+    
+        print(base_path)
+        return base_path
 
     def on_main_window_destroy(self, object, data=None):
         print("quit with cancel")
@@ -31,9 +42,10 @@ class OpenLabelsUi:
         Gtk.main_quit()
     
     def on_about_activate(self, menuitem, data=None):
-        print("help about selected")
-        #self.response = self.aboutdialog.run()
-        #self.aboutdialog.hide()
+        self.about_dialog.show()  
+        
+    def on_about_dlg_close(self,object):
+        self.about_dialog.hide() 
 
     def on_click_server_start_stop(self,object):
         if(self.server_running):            
@@ -175,9 +187,7 @@ class OpenLabelsUi:
         else:
             self.statusbar.push(self.statusbar_context_id,"Invalid configuraiton")
         
-        self.print_count_dialog.hide()
-    
-        
+        self.print_count_dialog.hide() 
         
     def set_preset_to_ui(self,data):
         if('width' in data):
@@ -288,7 +298,7 @@ class OpenLabelsUi:
     def __init__(self):
         self.print_server = None
         self.bmp_filepath = ''
-        self.gladefile = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "ui.glade" ))
+        self.gladefile = os.path.abspath(os.path.join(self.resource_path(), "ui.glade" ))
         self.builder = Gtk.Builder() 
         self.builder.add_from_file(self.gladefile)
 
@@ -300,6 +310,7 @@ class OpenLabelsUi:
         self.save_name_dialog = self.builder.get_object("save_name_dialog")
         self.delete_preset_dialog = self.builder.get_object("delete_preset_dialog")
         self.print_count_dialog = self.builder.get_object("print_count_dialog")
+        self.about_dialog = self.builder.get_object("about_dialog")
         self.statusbar = self.builder.get_object("statusbar")
         self.btn_start_server = self.builder.get_object("btn_server")
         self.preset_listbox = self.builder.get_object("preset_listbox")
@@ -322,7 +333,7 @@ class OpenLabelsUi:
         self.save_name_dialog.set_transient_for(self.window)
         self.delete_preset_dialog.set_transient_for(self.window)
         self.print_count_dialog.set_transient_for(self.window)
-        
+        self.about_dialog.set_transient_for(self.window)
         self.txt_width = self.builder.get_object("txt_width")
         self.txt_height = self.builder.get_object("txt_height")
         self.txt_x_gap = self.builder.get_object("txt_x_gap")
