@@ -6,6 +6,7 @@ Created on Mar 1, 2016
 import os
 import json
 from os.path import expanduser
+from collections import OrderedDict
 
 class Preset(object):
     '''
@@ -45,6 +46,8 @@ class Preset(object):
                 self.preset_data = json.loads(file_content)
         else:
             self.write_default_preset()
+            
+        self.preset_data = OrderedDict(sorted(self.preset_data.items(), key=lambda t: t[0]))
 
 
     def delete_preset(self,name):

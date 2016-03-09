@@ -12,6 +12,9 @@ import os
 import sys
 from net.bottronix.print_server import PrintServer
 from net.bottronix.ui.preset import Preset
+from DistUpgrade import sourceslist
+from net.bottronix.print_manager import PrintManager
+from net.bottronix.print_exception import PrintException
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
@@ -69,13 +72,25 @@ class OpenLabelsUi:
             self.statusbar.push(self.statusbar_context_id, "Server stopped.")
 
     def on_warning_dialog_close(self,object, object2):
-        self.warning_msg.hide()
+        self.warning_dialog.hide()
     
-    def on_click_print_label(self,object):
-        pass
+    def on_click_print_label(self,object):        
+        if(self.bmp_filepath == '' or os.path.exists(self.bmp_filepath)==False):
+            self.warning_dialog.set_markup("Please select a label image")
+            self.warning_dialog.show()
+            self.statusbar.push(self.statusbar_context_id,"Label image not found")
+            return
+        validation = self.validate_inputs()
+        if(validation ==0 ):
+            self.print_count_dialog.show()            
+        else:
+            self.warning_dialog.set_markup("Invalid configuration.")
+            self.warning_dialog.show()
+            self.statusbar.push(self.statusbar_context_id,"Invalid configuraiton")
+        
     
     def on_click_browse(self,object):
-        self.filechooser.show()
+        self.filechooser_dialog.show()
         
     def on_save_name_dialog_close(self,object):
         self.save_name_dialog.hide()
@@ -85,8 +100,8 @@ class OpenLabelsUi:
 
     def on_save_dialog_ok_button_clicked(self,object):
         if(self.txt_save_name.get_text()==""):
-            self.warning_msg.set_markup("Please enter a name")
-            self.warning_msg.show()
+            self.warning_dialog.set_markup("Please enter a name")
+            self.warning_dialog.show()
             return
         self.save_name_dialog.hide()
         ui_data = self.get_preset_from_ui(self.txt_save_name.get_text())
@@ -101,11 +116,68 @@ class OpenLabelsUi:
             self.txt_save_name.set_text("")
         self.save_name_dialog.show()
         
+    def on_btn_del_preset_clicked(self,source):
+        (model, iter) = self.preset_listbox.get_selection().get_selected()
+        selected_row = model.get_value(iter, 0)
+        if(selected_row!=''):
+            self.delete_preset_dialog.set_markup("Are you sure you need to delete "+selected_row+" ?")
+            self.delete_preset_dialog.target_row_id=selected_row
+            self.delete_preset_dialog.show()
+        
+    def btn_del_preset_dlg_cancel_clicked(self,source):
+        self.delete_preset_dialog.hide();
+    
+    def btn_del_preset_dlg_del_clicked(self,source):
+        self.delete_preset(self.delete_preset_dialog.target_row_id)
+        self.delete_preset_dialog.hide();
+    
     def on_preset_select(self,source,index,col_object):
         (model, iter) = source.get_selection().get_selected()
         selected_row = model.get_value(iter, 0)
         data = self.preset.get_preset(selected_row) 
         self.set_preset_to_ui(data)
+        
+    def on_btn_filechooser_dlg_cancel_clicked(self,source):
+        self.filechooser_dialog.hide()
+        
+    def on_btn_filechooser_dlg_select_clicked(self,source):
+        self.bmp_filepath = self.filechooser_dialog.get_filename()
+        self.preview_img.set_from_file(self.bmp_filepath)
+        self.filechooser_dialog.hide()
+        
+    def on_btn_prnt_count_dlg_cancel_clicked(self,source):
+        self.print_count_dialog.hide()
+        
+    def on_btn_prnt_count_dlg_print_clicked(self,source):
+        if(self.bmp_filepath == '' or os.path.exists(self.bmp_filepath)==False):
+            self.statusbar.push(self.statusbar_context_id,"Label not found")
+            return
+        
+        if(self.txt_print_count.get_text()==''):
+            self.statusbar.push(self.statusbar_context_id,"Invalid number of labels to print")
+            return
+        
+        validation = self.validate_inputs()
+        if(validation ==0 ):
+            self.get_input_values()            
+            self.print_mgr = PrintManager()
+            self.print_mgr.set_label_count(int(self.txt_print_count.get_text()))
+            self.print_mgr.set_label_size(self.width,self.height)
+            self.print_mgr.set_label_gaps(self.x_gap, self.y_gap)
+            self.print_mgr.set_print_options(self.labels_per_row, self.paper_width,self.x_offset,self.y_offset)
+            self.print_mgr.set_label_file(self.bmp_filepath)
+            try:
+                self.print_mgr.print_labels()
+            except PrintException as e:
+                self.statusbar.push(self.statusbar_context_id,"Print failed : "+e.value)
+                self.warning_dialog.set_markup("Print failed. "+e.value)
+                self.warning_dialog.show()
+        else:
+            self.statusbar.push(self.statusbar_context_id,"Invalid configuraiton")
+        
+        self.print_count_dialog.hide()
+    
+        
         
     def set_preset_to_ui(self,data):
         if('width' in data):
@@ -166,36 +238,40 @@ class OpenLabelsUi:
     def validate_inputs(self):
         error_count = 0;
         if(self.txt_width.get_text()=='' or int(self.txt_width.get_text()) <= 0):
-            self.warning_msg.set_markup("Invalid width.")
+            self.warning_dialog.set_markup("Invalid width.")
             error_count += 1
         if(self.txt_height.get_text()=='' or int(self.txt_height.get_text()) <=0):
-            self.warning_msg.set_markup("Invalid height")
+            self.warning_dialog.set_markup("Invalid height")
             error_count += 1
         if(self.txt_paper_width.get_text()=='' or int(self.txt_paper_width.get_text())<=0):
-            self.warning_msg.set_markup("Invalid paper width")
+            self.warning_dialog.set_markup("Invalid paper width")
             error_count += 1
         if(self.txt_labels_per_row.get_text()=='' or int(self.txt_labels_per_row.get_text())<=1):
-            self.warning_msg.set_markup("Labels per row must be greater than or equal to 1")
+            self.warning_dialog.set_markup("Labels per row must be greater than or equal to 1")
             error_count += 1
         if(self.txt_x_gap.get_text()!='' and int(self.txt_x_gap.get_text())<0):
-            self.warning_msg.set_markup("Invalid x gap")
+            self.warning_dialog.set_markup("Invalid x gap")
             error_count += 1
         if(self.txt_y_gap.get_text()!='' and int(self.txt_y_gap.get_text())<0):
-            self.warning_msg.set_markup("Invalid y gap")
+            self.warning_dialog.set_markup("Invalid y gap")
             error_count += 1
         if(self.txt_x_offset.get_text()!='' and int(self.txt_x_offset.get_text())<0):
-            self.warning_msg.set_markup("Invalid x offset")
+            self.warning_dialog.set_markup("Invalid x offset")
             error_count += 1
         if(self.txt_y_offset.get_text()!='' and int(self.txt_y_offset.get_text())<0):
-            self.warning_msg.set_markup("Invalid y offset")
+            self.warning_dialog.set_markup("Invalid y offset")
             error_count += 1
         if(error_count>0):
-            self.warning_msg.show()
+            self.warning_dialog.show()
             return 1;
         return 0
     
     def save_preset(self,ps):
         self.preset.save_preset(ps)
+        self.update_preset_list()
+        
+    def delete_preset(self,ps):
+        self.preset.delete_preset(ps)
         self.update_preset_list()
         
     def update_preset_list(self):
@@ -211,6 +287,7 @@ class OpenLabelsUi:
         
     def __init__(self):
         self.print_server = None
+        self.bmp_filepath = ''
         self.gladefile = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "ui.glade" ))
         self.builder = Gtk.Builder() 
         self.builder.add_from_file(self.gladefile)
@@ -218,15 +295,18 @@ class OpenLabelsUi:
         self.builder.connect_signals(self)
 
         self.window = self.builder.get_object("main_window")
-        self.filechooser = self.builder.get_object("filechooser")
-        self.warning_msg = self.builder.get_object("warning_dialog")
+        self.filechooser_dialog = self.builder.get_object("filechooser_dialog")
+        self.warning_dialog = self.builder.get_object("warning_dialog")
         self.save_name_dialog = self.builder.get_object("save_name_dialog")
+        self.delete_preset_dialog = self.builder.get_object("delete_preset_dialog")
+        self.print_count_dialog = self.builder.get_object("print_count_dialog")
         self.statusbar = self.builder.get_object("statusbar")
         self.btn_start_server = self.builder.get_object("btn_server")
         self.preset_listbox = self.builder.get_object("preset_listbox")
         self.btn_save_preset = self.builder.get_object("btn_save_preset")
         self.btn_del_preset = self.builder.get_object("btn_del_preset")
-        self.preset_liststore = self.builder.get_object("preset_liststore")     
+        self.preset_liststore = self.builder.get_object("preset_liststore")  
+        self.preview_img = self.builder.get_object("preview_img")   
         
         self.txt_width = self.builder.get_object("txt_width")
         self.txt_height = self.builder.get_object("txt_height")
@@ -237,9 +317,11 @@ class OpenLabelsUi:
         self.txt_x_offset = self.builder.get_object("txt_x_offset")
         self.txt_y_offset = self.builder.get_object("txt_y_offset")   
         
-        self.filechooser.set_transient_for(self.window)
-        self.warning_msg.set_transient_for(self.window)
+        self.filechooser_dialog.set_transient_for(self.window)
+        self.warning_dialog.set_transient_for(self.window)
         self.save_name_dialog.set_transient_for(self.window)
+        self.delete_preset_dialog.set_transient_for(self.window)
+        self.print_count_dialog.set_transient_for(self.window)
         
         self.txt_width = self.builder.get_object("txt_width")
         self.txt_height = self.builder.get_object("txt_height")
@@ -249,16 +331,17 @@ class OpenLabelsUi:
         self.txt_x_offset = self.builder.get_object("txt_x_offset")
         self.txt_y_offset = self.builder.get_object("txt_y_offset")
         self.txt_labels_per_row = self.builder.get_object("txt_labels_per_row")
+        self.txt_print_count = self.builder.get_object("txt_print_count")
         
         self.txt_save_name = self.builder.get_object("txt_save_name")
         
         self.statusbar_context_id = self.statusbar.get_context_id("statusbar")
         
         file_filter = Gtk.FileFilter()
-        file_filter.set_name("BMP Fiels")
+        file_filter.set_name("BMP Files")
         file_filter.add_pattern("*.bmp")
         file_filter.add_pattern("*.BMP")
-        self.filechooser.add_filter(file_filter)
+        self.filechooser_dialog.add_filter(file_filter)
         
         self.preset = Preset()
         

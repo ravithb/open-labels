@@ -138,8 +138,12 @@ class PrintManager():
             self.printer = open(self.printer_port,"wb")
             print("Printer opened.")
         except:
-            print("Couldnt open printer at "+self.printer_port)
-            raise PrintException("Couldn't open printer at "+self.printer_port)
+            if(self.printer_port!=None):
+                print("Couldnt open printer at "+self.printer_port)
+                raise PrintException("Couldn't open printer at "+self.printer_port)
+            else:
+                print("Printer not connected")
+                raise PrintException("Printer not connected")
         
     def send_init_commands(self):
         if(self.printer is None):
