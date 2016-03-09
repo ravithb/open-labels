@@ -10,10 +10,6 @@ Commandline Usage is as follows.
         ./main.py <label-file> <width-mm> <height-mm> <horizontal-gap-mm> <vertical-gap-mm> <labels-per-row> <paper-width-mm> <lable-count> [<printer-port>]
         
 ```
-To Run UI
-```
-        ./run-ui.py
-```
 
 ```
         
@@ -28,6 +24,11 @@ To Run UI
         9) layel-y-offset-mm  : Vertical offset in mm
         10) label-count       : Number of lables to print
         11) printer-port      : [Optional] printer device path [eg: /dev/usb/lp0]
+```
+
+To Run UI
+```
+        ./run-ui.py
 ```
 
 # TODO List
