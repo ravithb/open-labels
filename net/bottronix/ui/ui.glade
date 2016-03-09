@@ -126,6 +126,7 @@
     <property name="title" translatable="yes">Open Labels</property>
     <property name="resizable">False</property>
     <property name="window_position">mouse</property>
+    <property name="icon">icon.png</property>
     <property name="gravity">center</property>
     <signal name="destroy" handler="on_main_window_destroy" swapped="no"/>
     <child>
