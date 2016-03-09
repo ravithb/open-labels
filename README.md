@@ -39,6 +39,7 @@ To Run UI
  - [x] Create http server to support printing via web
  - [x] Create tool operator page to send commands to the http server
  - [x] Create GUI 
+ - [ ] Create standalone linux executable - work in progress
  - [ ] Support png and jpeg image types
  - [ ] Create label designer
  - [ ] Create support for other printer models
