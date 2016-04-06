@@ -134,7 +134,7 @@ class PrintManager():
         self.close_printer()
 
     def open_printer(self):
-        try:
+        try:            
             self.printer = open(self.printer_port,"wb")
             print("Printer opened.")
         except:

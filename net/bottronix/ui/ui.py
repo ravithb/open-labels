@@ -179,6 +179,7 @@ class OpenLabelsUi:
             self.print_mgr.set_print_options(self.labels_per_row, self.paper_width,self.x_offset,self.y_offset)
             self.print_mgr.set_label_file(self.bmp_filepath)
             try:
+                self.print_mgr.init()
                 self.print_mgr.print_labels()
             except PrintException as e:
                 self.statusbar.push(self.statusbar_context_id,"Print failed : "+e.value)
@@ -203,9 +204,9 @@ class OpenLabelsUi:
         if('labels_per_row' in data):
             self.txt_labels_per_row.set_text(str(data['labels_per_row']))
         if('x_offset' in data):
-            self.txt_y_offset.set_text(str(data['x_offset']))
+            self.txt_x_offset.set_text(str(data['x_offset']))
         if('y_offset' in data):
-            self.txt_x_offset.set_text(str(data['y_offset']))
+            self.txt_y_offset.set_text(str(data['y_offset']))
         
     def get_preset_from_ui(self,name):
         data = {name: {"width":self.txt_width.get_text(),\
