@@ -35,6 +35,23 @@ class Preset(object):
         
     def save_preset(self, ps):
         self.preset_data.update(ps)
+        if('width' in ps and str(ps['width'])==''):
+            ps['width'] = 0
+        if('height' in ps and str(ps['height'])==''):
+            ps['height'] = 0
+        if('x_gap' in ps and str(ps['x_gap'])==''):
+            ps['x_gap'] = 0
+        if('y_gap' in ps and str(ps['y_gap'])==''):
+            ps['y_gap'] = 0
+        if('paper_width' in ps and str(ps['paper_width'])==''):
+            ps['paper_width'] = 0
+        if('labels_per_row' in ps and str(ps['labels_per_row'])==''):
+            ps['labels_per_row'] = 0
+        if('x_offset' in ps and str(ps['x_offset'])==''):
+            ps['x_offset'] = 0
+        if('y_offset' in ps and str(ps['y_offset'])==''):
+            ps['y_offset'] = 0
+            
         with open(self.presets_file_path, 'w') as tfile:
             json.dump(self.preset_data, tfile)
 

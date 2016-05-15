@@ -248,28 +248,28 @@ class OpenLabelsUi:
         
     def validate_inputs(self):
         error_count = 0;
-        if(self.txt_width.get_text()=='' or int(self.txt_width.get_text()) <= 0):
+        if(len(self.txt_width.get_text().strip())==0 or int(self.txt_width.get_text()) <= 0):
             self.warning_dialog.set_markup("Invalid width.")
             error_count += 1
-        if(self.txt_height.get_text()=='' or int(self.txt_height.get_text()) <=0):
+        if(len(self.txt_height.get_text().strip())==0 or int(self.txt_height.get_text()) <=0):
             self.warning_dialog.set_markup("Invalid height")
             error_count += 1
-        if(self.txt_paper_width.get_text()=='' or int(self.txt_paper_width.get_text())<=0):
+        if(len(self.txt_paper_width.get_text().strip())==0 or int(self.txt_paper_width.get_text())<=0):
             self.warning_dialog.set_markup("Invalid paper width")
             error_count += 1
-        if(self.txt_labels_per_row.get_text()=='' or int(self.txt_labels_per_row.get_text())<=1):
+        if(len(self.txt_labels_per_row.get_text().strip())==0 or int(self.txt_labels_per_row.get_text())<=1):
             self.warning_dialog.set_markup("Labels per row must be greater than or equal to 1")
             error_count += 1
-        if(self.txt_x_gap.get_text()!='' and int(self.txt_x_gap.get_text())<0):
+        if(len(self.txt_x_gap.get_text().strip())==0 or int(self.txt_x_gap.get_text())<0):
             self.warning_dialog.set_markup("Invalid x gap")
             error_count += 1
-        if(self.txt_y_gap.get_text()!='' and int(self.txt_y_gap.get_text())<0):
+        if(len(self.txt_y_gap.get_text().strip())==0 or int(self.txt_y_gap.get_text())<0):
             self.warning_dialog.set_markup("Invalid y gap")
             error_count += 1
-        if(self.txt_x_offset.get_text()!='' and int(self.txt_x_offset.get_text())<0):
+        if(len(self.txt_x_offset.get_text().strip())==0 or int(self.txt_x_offset.get_text())<0):
             self.warning_dialog.set_markup("Invalid x offset")
             error_count += 1
-        if(self.txt_y_offset.get_text()!='' and int(self.txt_y_offset.get_text())<0):
+        if(len(self.txt_y_offset.get_text().strip())==0 or int(self.txt_y_offset.get_text())<0):
             self.warning_dialog.set_markup("Invalid y offset")
             error_count += 1
         if(error_count>0):
@@ -278,8 +278,10 @@ class OpenLabelsUi:
         return 0
     
     def save_preset(self,ps):
-        self.preset.save_preset(ps)
-        self.update_preset_list()
+        result = self.validate_inputs()
+        if(result == 0):
+            self.preset.save_preset(ps)
+            self.update_preset_list()
         
     def delete_preset(self,ps):
         self.preset.delete_preset(ps)
